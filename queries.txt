@@ -1,0 +1,125 @@
+-- Query-1
+SELECT 
+    t.name_type AS type, COUNT(pt.pokedex_number) AS count 
+FROM 
+    pokemontype pt JOIN pokemon p 
+ON 
+    pt.pokedex_number = p.pokedex_number 
+JOIN 
+    types t 
+ON 
+    pt.type_id = t.type_id 
+GROUP
+    BY type 
+ORDER
+    BY count DESC;
+
+-- Query-2
+SELECT 
+    p.name, p.base_total 
+FROM 
+    pokemon p 
+WHERE 
+    p.base_total > 600 
+ORDER BY 
+    base_total DESC;
+   
+-- Query-3   
+SELECT 
+    t.name_type AS type, 
+    AVG(p.base_total)::NUMERIC AS average
+FROM 
+    pokemon p 
+JOIN 
+    pokemontype pt ON p.pokedex_number = pt.pokedex_number 
+JOIN 
+    types t ON t.type_id = pt.type_id 
+GROUP BY 
+    t.name_type 
+ORDER BY 
+    average;
+
+-- Query-4
+SELECT 
+    p.name, 
+    p.base_total 
+FROM 
+    pokemon p 
+JOIN 
+    pokemonability pa ON p.pokedex_number = pa.pokedex_number 
+JOIN 
+    abilities a ON a.ability_id = pa.ability_id 
+WHERE 
+    a.name_ability = 'Overgrow' 
+ORDER BY 
+    p.base_total DESC;
+
+-- Query-5
+SELECT 
+    p.name,
+    MAX(CASE WHEN pt.type_id = LEAST(pt.type_id, pt2.type_id) THEN t.name_type END) AS primary_type,
+    MAX(CASE WHEN pt2.type_id IS NOT NULL AND pt.type_id = GREATEST(pt.type_id, pt2.type_id) THEN t.name_type END) AS secondary_type
+FROM 
+    pokemon p
+JOIN 
+    pokemontype pt ON p.pokedex_number = pt.pokedex_number
+JOIN 
+    types t ON t.type_id = pt.type_id
+LEFT JOIN 
+    pokemontype pt2 ON p.pokedex_number = pt2.pokedex_number AND pt.type_id != pt2.type_id
+GROUP BY 
+    p.name
+ORDER BY 
+    p.name;
+
+-- Query-6
+SELECT 
+    p.name,
+    p.generation,
+    p.base_total AS total_stats
+FROM 
+    pokemon p
+WHERE 
+    p.base_total > (
+        SELECT 
+            AVG(p2.base_total)
+        FROM 
+            pokemon p2
+        WHERE 
+            p2.generation = p.generation
+    );
+
+-- Query-7
+SELECT 
+    p.name, 
+    s.attack 
+FROM 
+    pokemon p
+JOIN 
+    stats s 
+    ON p.pokedex_number = s.pokedex_number
+JOIN 
+    pokemontype pt 
+    ON p.pokedex_number = pt.pokedex_number
+JOIN 
+    types t 
+    ON t.type_id = pt.type_id
+WHERE 
+    t.name_type = 'fire' 
+    AND s.attack > 100;
+
+-- Query-8
+SELECT 
+    p.name,
+    p.generation,
+    p.base_total,
+    CASE
+        WHEN p.base_total > (
+            SELECT AVG(p2.base_total)
+            FROM pokemon p2
+            WHERE p2.generation = p.generation
+        ) THEN 'greater than the average'
+        ELSE 'less or equal to the average'
+    END AS total_stats_comparison
+FROM 
+    pokemon p;
