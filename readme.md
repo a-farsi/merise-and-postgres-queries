@@ -1,18 +1,16 @@
 
-The Lab consists of main parts:
+This hands-on consists of three main parts:
 
 The first one is about creating a database and manipulating information in it.
 The second one involves setting up a more complex database and retrieving information from it.
 The last part  is to automate database manipulation by putting the commands into a Python script.
 
-### Database Creation for the Lab:
-
-
-#### Database Definition 
 [oracle site: https://www.oracle.com/database/what-is-database/]:
 A database is an organized collection of structured information, or data, typically stored electronically in a computer system. A database is usually controlled by a database management system (DBMS). Together, the data and the DBMS, along with the applications that are associated with them, are referred to as a database system, often shortened to just database.
 
-We are going to install Postgres using its Docker image. To do this, create a docker-compose.yaml file in a dedicated folder and define the following setup:
+### Database Creation for the hands-on:
+
+to complete our hands-on, we are going to install PostgreSQL, which is an open-source, advanced object-relational DBMS, using its Docker image. To do this, we create a docker-compose.yaml file in a dedicated folder and define the following setup:
 
 ```
 version: '3.8'
@@ -90,8 +88,15 @@ to check the running containers :
 ```
 docker ps
 ``` 
+Here is the output showing the docker containers that are currently running :
 
-figure
+<p align="center">
+<img src="./figures/black_figure_to_replace.png" width=100%>
+</p>
+<p align="center" style="font-weight: bold;">
+Figure 1: output running containers
+</p>
+
 
 We see that we have two running containers, named *_pg_container_* and  *_pgadmin4_container_*, respectively.
 
@@ -108,19 +113,28 @@ createdb -h localhost -U afa_user <db_name>
 
 To connect to the DB :
 ```
-psql -h localhost -U afa_user dst_db
+psql -h localhost -U afa_user <db_name>
 ```
 
 to list the existing DB : 
 ```
 \l
 ```
-figure to place here.
+
+<p align="center">
+<img src="./figures/black_figure_to_replace.png" width=100%>
+</p>
+<p align="center" style="font-weight: bold;">
+Figure 2: Display the existing databases
+</p>
+
 
 To create a database : 
 ```
 CREATE DATABASE <db_name>;
 ```
+
+### Part 1: Creating the tables:
 
 Considering the dataset for Anime that we present in the table bellows : 
 
@@ -131,81 +145,70 @@ Considering the dataset for Anime that we present in the table bellows :
 Figure 4: Anime dataset
 </p>
 
-MERISE est une méthode de conception, de développement et de réalisation de projets informatiques.
-La méthode MERISE est basée sur la séparation des données et des traitements à effectuer en plusieurs modèles conceptuels et physiques.
+Using the MERISE method, we are building an Logical Data Model (LDM) for this dataset while following the rules.
+
+MERISE is a method for designing, developing, and implementing IT projects.
+It is based on the separation of data and processes into multiple conceptual and physical models. 
+
+The figure below illustrates the different steps through which we pass from the dataset to achieve the Physical Data Model (Modèle Physique de Données), which is the final step of database design before implementation.
 
 <p align="center">
 <img src="./figures/5.en-summary-merise-methodology.png" width=100%>
 </p>
 <p align="center" style="font-weight: bold;">
-Figure 5: steps of Merise methodology
+Figure 5: steps of Merise method
 </p>
 
-Pour construire un MLD (Modèle Logique de Données) pour ce dataset d'animes et justiffier des changements effectués :
+#### Construction of the Logical Data Model (MLD - Modèle Logique de Données)
+The proposed structure is justified by normalization principles, separation of concerns, relationship management between entities, and model scalability. It ensures the creation of a robust database that is easy to maintain and evolve.
 
-Le découpage proposé est justifié par les principes de normalisation, la séparation des préoccupations, la gestion des relations entre les entités, et l'extensibilité du modèle. Il permet de créer une base de données robuste, facile à maintenir et à faire évoluer. Le découpage proposé est justifié par les principes de normalisation, la séparation des préoccupations, la gestion des relations entre les entités, et l'extensibilité du modèle. Il permet de créer une base de données robuste, facile à maintenir et à faire évoluer. 
-Le choix de découpage des tables et des entités dans un modèle de base de données repose sur les principes de normalisation et les bonnes pratiques de conception de bases de données relationnelles. Voici une justification détaillée pour chaque entité et table proposée :
+1. Normalization
+Normalization is a process aimed at eliminating data redundancy and organizing data in a consistent manner. Here’s how it applies in this case:
 
-1. Normalisation
-La normalisation est un processus qui vise à éliminer la redondance des données et à organiser les données de manière cohérente. Voici comment elle s'applique ici :
+Eliminating Redundant Data
+In the initial table, columns such as Genres, Producers, and Studios contain lists of values separated by commas (e.g., [Action, Adventure, Drama]). This violates the First Normal Form (1NF), which requires that each column contain atomic (indivisible) values.
 
-Élimination des données redondantes
-Dans la table initiale, les colonnes comme Genres, Producers, et Studios contiennent des listes de valeurs séparées par des virgules (par exemple, [Action, Adventure, Drama]). Cela viole la première forme normale (1NF), qui exige que chaque colonne contienne des valeurs atomiques (indivisibles).
+By creating separate tables for Genre, Producer, and Studio, we comply with 1NF and avoid redundancy.
 
-En créant des tables séparées pour Genre, Producer, et Studio, nous respectons la 1NF et évitons la redondance.
+Preventing Update Anomalies
+If genres, producers, or studios were stored directly in the Anime table, any modification (e.g., changing a studio’s name) would require updating multiple rows, potentially leading to update anomalies.
 
-Éviter les anomalies de mise à jour
-Si les genres, producteurs ou studios étaient stockés directement dans la table Anime, toute modification (par exemple, changer le nom d'un studio) nécessiterait de mettre à jour plusieurs lignes. Cela pourrait entraîner des anomalies de mise à jour.
+With separate tables, modifications only need to be made in a single location.
 
-Avec des tables séparées, une modification ne doit être faite qu'à un seul endroit.
+2. Separation of Concerns
 
-2. Séparation des préoccupations
-Chaque table a une responsabilité claire et unique, ce qui améliore la maintenabilité et la lisibilité du modèle.
+Each table has a clear and distinct responsibility, improving maintainability and readability of the model.
 
-Anime : Stocke les informations de base sur un anime (nom, score, type, etc.).
+- Anime: Stores basic information about an anime (name, score, type, etc.).
+- Genre: Stores the different available genres.
+- Producer: Stores producer details.
+- Studio: Stores studio information.
+- Aired: Stores broadcasting details (start and end dates).
+- Premiered: Stores premiere information (season and year).
 
-Genre : Stocke les différents genres disponibles.
+3. Relationships Between Tables
 
-Producer : Stocke les producteurs.
+The structure allows for clear and well-defined relationships, which are crucial for a relational database.
 
-Studio : Stocke les studios.
+- One-to-Many (1-n) Relationships:
+An anime can have a single broadcast entry (Aired) and a single premiere entry (Premiered), but each broadcast or premiere corresponds to only one anime.
+This justifies the 1-n relationships between Anime and Aired, and between Anime and Premiered.
 
-Aired : Stocke les informations de diffusion (dates de début et de fin).
+- Many-to-Many (n-n) Relationships
+An anime can belong to multiple genres, and a genre can be associated with multiple animes.
+Similarly, an anime can have multiple producers/studios, and a producer/studio can be linked to multiple animes.
+This justifies the use of junction tables (Anime_Genre, Anime_Producer, Anime_Studio) to properly manage n-n relationships.
 
-Premiered : Stocke les informations de première diffusion (saison et année).
+4. Extensibility
 
-3. Relations entre les tables
-Le découpage permet de définir des relations claires entre les tables, ce qui est essentiel pour une base de données relationnelle.
+The structure makes the model more flexible and scalable.
 
-Relations 1-n :
+##### Adding New Genres, Producers, or Studios
+If new genres, producers, or studios need to be added, a new row can simply be inserted into the corresponding table without modifying the database schema.
+Adding New Information
+If additional details (e.g., extra information about studios) need to be stored, they can be added to the relevant table without affecting other tables.
 
-Un anime peut avoir une seule diffusion (Aired) et une seule première diffusion (Premiered), mais une diffusion ou une première diffusion ne concerne qu'un seul anime. Cela justifie les relations 1-n entre Anime et Aired, et entre Anime et Premiered.
-
-Relations n-n :
-
-Un anime peut avoir plusieurs genres, et un genre peut être associé à plusieurs animes. De même, un anime peut avoir plusieurs producteurs/studios, et un producteur/studio peut être associé à plusieurs animes. Cela justifie l'utilisation de tables de liaison (Anime_Genre, Anime_Producer, Anime_Studio) pour gérer les relations n-n.
-
-4. Extensibilité
-Le découpage rend le modèle plus flexible et extensible.
-
-Ajout de nouveaux genres, producteurs ou studios :
-
-Si de nouveaux genres, producteurs ou studios sont ajoutés, il suffit d'insérer une nouvelle ligne dans la table correspondante sans modifier la structure de la base de données.
-
-Ajout de nouvelles informations :
-
-Si de nouvelles informations doivent être ajoutées (par exemple, des détails supplémentaires sur les studios), elles peuvent être ajoutées à la table concernée sans affecter les autres tables.
-
-6. Avantages du découpage
-Réduction de la redondance : Les données ne sont pas dupliquées.
-
-Maintenabilité : Les modifications sont plus faciles à gérer.
-
-Extensibilité : Le modèle peut évoluer sans nécessiter de refonte majeure.
-
-Performance : Les requêtes peuvent être optimisées en fonction des besoins (par exemple, rechercher tous les animes d'un genre spécifique).
-
-Physical Data Model
+The following figure shows the proposed Physical Data Model, taking our arguments into account.
 
 <p align="center">
 <img src="./figures/1.diagramme_merise_labs.png" width=100%>
@@ -217,6 +220,7 @@ Figure 6: Physical model
 
 
 
+### Creation of tables:
 
 here is how to create tables and their relationships:
 
@@ -299,36 +303,7 @@ CREATE TABLE Anime_Studio (
 );
 ```
 
-#### Structure des tables principales :
-
-- anime : Table principale avec toutes les informations sur les animes
-- genre : Catalogue des genres possibles
-- producer : Liste des producteurs
-- studio : Liste des studios d'animation
-
-
-#### Tables de jonction :
-
-- anime_genre : Lie les animes à leurs genres
-- anime_producer : Lie les animes à leurs producteurs
-- anime_studio : Lie les animes à leurs studios
-
-
-#### Contraintes importantes :
-
-Clés primaires sur toutes les tables
-Clés étrangères pour maintenir l'intégrité référentielle
-Contraintes UNIQUE sur les noms des genres, producteurs et studios
-Cascade sur la suppression pour maintenir la cohérence des données
-
-
-#### Optimisations :
-
-Index créés sur les colonnes fréquemment recherchées
-Types de données appropriés pour chaque colonne
-SERIAL pour auto-incrémentation des IDs
-
-### Requêtes d'insertions des données:
+### Data insertion queries:
 
 ```
 INSERT INTO Anime (Anime_ID, English_name, Score, Type, Episodes, Source, Duration, Rating, Ranked, Popularity)
@@ -472,7 +447,7 @@ To show details of a table
 Figure 7: Details of table Anime
 </p>
 
-To insert data from a file, create first a file named insert-data.sql, whithin the our container, that contains all insertions code above, then run the following command
+To insert data from a file, create first a file named _insert-data.sql_, whithin our container, containing all the insertion code above, and then run the following command
 ```
 \i /path/to/insert_anime.sql
 ```
@@ -484,7 +459,7 @@ To insert data from a file, create first a file named insert-data.sql, whithin t
 Figure 8: output when running the script that inserts data in tables
 </p>
 
-### Part II
+### Part II Perform SQL Query Execution  
 
 Download data using this command :
 
@@ -509,7 +484,7 @@ docker exec -i pg_container psql -U afa_user -d postgres -c "\l"
 Figure 9: listing the existing databases
 </p>
 
-To execute the SQL script on a specified database that is inside a running Docker container, run this command:
+To execute the SQL script on a specified database inside a running Docker container, run this command:
 
 
 ```
@@ -533,18 +508,18 @@ docker exec -i pg_container psql -U afa_user -d postgres -c "\dt"
 Figure 10: Display tables whithin the database examan_afa
 </p>
 
-#### SQL Requests:
+#### SQL queries:
 
-For aim of clarity, we do not run the sql statement from outside the container by running this command:
+For the sake of clarity, we do not run the SQL statement from outside the container using this command:
+
 ```
 docker exec -it pg_container psql -U afa_user -d examen_afa -c "SQL-statement"
 ```
-However, we prefer connect to the database then after we run sql statements. 
+However, we prefer connect to the database first, then run sql statements. 
 
 This is the command to connect to the database _examen\_afa_
 
-##### SQL Request 1
-
+##### SQL query 1
 
 
 ```
@@ -563,7 +538,7 @@ GROUP
 ORDER
     BY count DESC;
 ```
-This query joins the three tables (pokemon, types and pokemontype) and groups the results by type.
+This query joins the three tables (pokemon, types and pokemontype) and groups the result by type.
 
 <p align="center">
 <img src="./figures/11.group-pokemon-by type.png" width=100%>
@@ -573,7 +548,7 @@ Figure 11: group pokemon by type and order them according to their number, decre
 </p>
 
 
-##### SQL Request 2
+##### SQL query 2
 List pokemon names and base stat total grater than 600 in descending order. 
 
 ```
@@ -594,8 +569,10 @@ ORDER BY
 Figure 12: Display pokemon name and base total with two conditions.
 </p>
 
-##### SQL Request 3
- To display the average base stats of Pokemon, grouped by their type, and sorts the results in ascending order according to the average:
+##### SQL query 3
+
+ Display the average base stats of Pokemon, grouped by their type, and sorts the result in ascending order according to the average:
+
 ```
 SELECT 
     t.name_type AS type, 
@@ -620,9 +597,9 @@ ORDER BY
 Figure 13: Display pokemon name and average base total with two conditions.
 </p>
 
-##### SQL Request 4
+##### SQL query 4
 
-list Pokemons with the special ability 'Overgrow' and sort them by base stats in descending order
+List Pokemons with the special ability 'Overgrow' and sort them by base stats in descending order
 
 ```
 SELECT 
@@ -647,9 +624,9 @@ ORDER BY
 Figure 14: Display pokemon with special ability in descending order according to base stats.
 </p>
 
-##### SQL Request 5
+##### SQL query 5
 
-To list pokemon by their names and their primary and secondary types, we can group the pokemon by their names, and for each name, print the types by using conditional operations on _type\_id_ as shown through the following query:
+To list pokemon by their names and their primary and secondary types, we can group the pokemon by their names, and for each name we print the types by using conditional operations on _type\_id_ as shown by the following query:
 
 ```
 SELECT 
@@ -669,6 +646,7 @@ GROUP BY
 ORDER BY 
     p.name;
 ```
+
 <p align="center">
 <img src="./figures/15.display-pokemon-names-and-types.png" width=100%>
 </p>
@@ -676,7 +654,10 @@ ORDER BY
 Figure 15: Display pokemon names and their primary and secondary types.
 </p>
 
-##### SQL Request 6
+##### SQL query 6
+
+Display Pokemon with a _base\_total_ greater than the average _base\_total_ per generation:
+
 ```
 SELECT 
     p.name,
@@ -695,8 +676,6 @@ WHERE
     );
 ```
 
-To display Pokemon with a _base\_total_ greater than the average _base\_total_ per generation:
-
 <p align="center">
 <img src="./figures/16.display-pokemon-when-base-total-greater-then-the-average-per-generation.png" width=80%>
 </p>
@@ -704,7 +683,7 @@ To display Pokemon with a _base\_total_ greater than the average _base\_total_ p
 Figure 16: Display pokemon when base_total is greater the the average base_total per generation.
 </p>
 
-##### SQL Request 7
+##### SQL query 7
 
 To find pokemon of type "fire" with attack greater than 100 :
 
@@ -735,7 +714,10 @@ WHERE
 Figure 17: Display pokemon the type is 'fire' and the attack is greater than 100.
 </p>
 
-##### SQL Request 8
+##### SQL query 8
+
+Indiquer si le total des stats d'un Pokémon est supérieur ou inférieur à la moyenne par génération.
+Indicate whether a Pokémon's total stats of  is great or less than the average for its generation.
 
 ```
 SELECT 
@@ -758,48 +740,57 @@ FROM
 <img src="./figures/18.display-pokemon-with-new-column.png" width=80%>
 </p>
 <p align="center" style="font-weight: bold;">
-Figure 18: Display pokemon with new column.
+Figure 18: Display pokemon with new column according to a given condition.
 </p>
 
-### Part III
+### Part III : Automate all queries using a Python script :
 
-In our docker there is no python installed, so we start by installing python3 on the alpine distribution.
+In our docker there is no Python installed, so we start by installing Python3 on the alpine distribution.
 
-we copy the script python in the container using this command: 
+We copy the Python script in the container using these commands: 
 ```
 docker cp ./run-queries-python.py pg_container:/home
 
 docker cp ./queries.txt pg_container:/home
 ```
-to cpnnect to the container 
+To connect to the container : 
 ```
 docker exec -it pg_container sh
 ```
-install python 3 and the needed dependency : 
+Install python3 and the required dependencies : 
 ```
 apk add --no-cache python3
 
 apk add --no-cache py3-psycopg2
 ```
-exit the contaner
+
+To run the python script, we use the following command :
 
 ```
 docker exec -it pg_container python3 /home/run-queries-and-save-result-python.py
 ```
 
 <p align="center">
-<img src="./figures/19.the-output-executed-python.png" width=100%>
+<img src="./figures/19.the-output-executed-Python.png" width=100%>
 </p>
 <p align="center" style="font-weight: bold;">
-Figure 19: The output of the executed python command.
+Figure 19: The output of the executed Python command.
 </p>
 
-first create the backup inside the container, in a directory that the PostgreSQL user has write access to
+##### Restaoring the Database:
+To make a backup of the database :
+
+- first create the backup inside the container, in a directory that the user _PostgreSQL_ has write access to
+
 ```
 docker exec -it pg_container pg_dump -U afa_user examen_afa -f /tmp/examen_afa.sql
 ```
 
+- Then we copy the backup from the container to the host machine :
+
+```
 docker cp pg_container:/tmp/examen_afa.sql .
+```
 
 <p align="center">
 <img src="./figures/20.the-output-when-copying-backup.png" width=100%>
