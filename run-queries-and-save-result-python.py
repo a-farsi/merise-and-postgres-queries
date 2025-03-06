@@ -38,6 +38,6 @@ def run_queries_from_file(file_path):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    queries_file_path = "/home/queries.txt"  # Full path to your queries file in the container
+    queries_file_path = "/home/queries.txt"
     run_queries_from_file(queries_file_path)
 
