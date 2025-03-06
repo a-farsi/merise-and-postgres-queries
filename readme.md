@@ -1,3 +1,4 @@
+<h1 align="center">SQL - Implementation of a Relational Database</h1> 
 
 This hands-on consists of three main parts:
 
@@ -84,6 +85,14 @@ To run the docker-compose file :
 ```
 docker-compose up -d
 ```
+
+<p align="center">
+<img src="./figures/0.launch_our_docker-compose.png" width=100%>
+</p>
+<p align="center" style="font-weight: bold;">
+Figure 1: Launch our containers
+</p>
+
 to check the running containers : 
 ```
 docker ps
@@ -91,7 +100,7 @@ docker ps
 Here is the output showing the docker containers that are currently running :
 
 <p align="center">
-<img src="./figures/black_figure_to_replace.png" width=100%>
+<img src="./figures/1.showing_the_running_containers.png" width=100%>
 </p>
 <p align="center" style="font-weight: bold;">
 Figure 1: output running containers
@@ -122,7 +131,7 @@ to list the existing DB :
 ```
 
 <p align="center">
-<img src="./figures/black_figure_to_replace.png" width=100%>
+<img src="./figures/2.display_the_existing_db.png" width=100%>
 </p>
 <p align="center" style="font-weight: bold;">
 Figure 2: Display the existing databases
@@ -771,7 +780,7 @@ docker exec -it pg_container python3 /home/run-queries-and-save-result-python.py
 ```
 
 <p align="center">
-<img src="./figures/19.the-output-executed-Python.png" width=100%>
+<img src="./figures/19.the-output-executed-python.png" width=100%>
 </p>
 <p align="center" style="font-weight: bold;">
 Figure 19: The output of the executed Python command.
